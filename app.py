@@ -235,6 +235,59 @@ def ical_event():
     return Response(html, mimetype="text/html")
 
 
+@app.route("/migrate-data", methods=["POST"])
+def migrate_data():
+    """One-time migration endpoint. Remove after use."""
+    from database import get_connection
+    conn = get_connection()
+    cur = conn.cursor()
+
+    tasks = [
+        ("order me something yummy", "2026-02-16 20:31:15", 1, "[]", 1),
+        ("Setup the ring camera", "2026-02-16 23:37:58", 1, "[]", 1),
+        ("Life insurance and will", "2026-02-17 03:49:32", 0, "[]", 1),
+        ("Dishwasher lower rack and smell", "2026-02-17 03:50:06", 1, "[]", 1),
+        ("Storage shed #2?", "2026-02-17 03:50:25", 0, "[]", 1),
+        ("Gates for bill to not escape", "2026-02-17 03:50:37", 0, "[]", 1),
+        ("Plant more edibles for spring", "2026-02-17 03:51:06", 0, "[]", 1),
+        ("Hedges for front of house / where garage door was", "2026-02-17 03:51:23", 0, "[]", 1),
+        ("Set up gates / playpen for booba", "2026-02-17 03:51:45", 0, "[]", 1),
+        ("Childproof", "2026-02-17 03:51:54", 1, "[]", 1),
+        ("New air fryer for booba", "2026-02-18 07:57:20", 0, "[]", 1),
+        ("calendar reminders (invites but also trash tuesdays etc)", "2026-02-18 17:41:21", 0, "[]", 1),
+        ("passport for booba (need to do pic + plan a day to go to agency together)", "2026-02-18 17:42:52", 0, "[]", 1),
+        ("meal plan in advance so I am not flustered", "2026-02-18 17:43:53", 0, "[]", 1),
+        ("can you help me with my front license plate?", "2026-02-18 17:44:22", 0, "[]", 1),
+        ("Trip to NY and Paris w Audrey in May/June? Free room in Paris.", "2026-02-18 17:54:57", 0, "[]", 1),
+        ("When is jacks next grooming? Please add birdie wash + cut", "2026-02-19 18:16:12", 1, "[]", 1),
+        ("Order more nipples https://amzn.to/3MPTLQQ", "2026-02-19 18:26:06", 1, "[]", 1),
+        ("Do we want to book Jackson Hole if still available?", "2026-02-26 23:02:07", 0, "[]", 1),
+        ("Flowers", "2026-02-27 05:09:04", 0, "[]", 1),
+    ]
+
+    for desc, created, completed, products, board_id in tasks:
+        cur.execute(
+            "INSERT INTO tasks (description, created_at, completed, products, board_id) VALUES (%s, %s, %s, %s, %s)",
+            (desc, created, completed, products, board_id)
+        )
+
+    recurring = [
+        ("Flowers", 4, 1),
+        ("Trash day tmrw", 1, 1),
+    ]
+
+    for desc, dow, board_id in recurring:
+        cur.execute(
+            "INSERT INTO recurring_tasks (description, day_of_week, board_id) VALUES (%s, %s, %s)",
+            (desc, dow, board_id)
+        )
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    return jsonify({"status": "ok", "tasks_migrated": len(tasks), "recurring_migrated": len(recurring)})
+
+
 if __name__ == "__main__":
     init_db()
     app.run(host="0.0.0.0", port=8080)
