@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  web:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - db-data:/app/data
+      - ./agent.py:/app/agent.py
+      - ./app.py:/app/app.py
+      - ./database.py:/app/database.py
+      - ./templates:/app/templates
+    env_file:
+      - .env
+    restart: unless-stopped
+volumes:
+  db-data:

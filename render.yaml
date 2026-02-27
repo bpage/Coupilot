@@ -1,0 +1,36 @@
+databases:
+  - name: coupilot-db
+    plan: free
+    databaseName: coupilot
+    ipAllowList: []
+
+services:
+  - type: web
+    name: coupilot
+    runtime: docker
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: coupilot-db
+          property: connectionString
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_FROM
+        sync: false
+      - key: MY_WHATSAPP_NUMBER
+        sync: false
+      - key: SERVER_URL
+        sync: false
+      - key: BOARD1_NAME
+        sync: false
+      - key: BOARD1_WHATSAPP
+        sync: false
+      - key: BOARD2_NAME
+        sync: false
+      - key: BOARD2_WHATSAPP
+        sync: false

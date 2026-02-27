@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Coupilot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,800;0,900;1,700;1,800;1,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            color: #111111;
+        }
+
+        /* Logo */
+        .logo {
+            font-family: 'Fraunces', serif;
+            font-style: italic;
+            font-weight: 800;
+            color: #c0405e;
+            font-size: 38px;
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+
+        /* Section labels */
+        .section-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #aaaaaa;
+        }
+
+        /* Safe areas */
+        .safe-top { padding-top: max(env(safe-area-inset-top, 0px), 0px); }
+        .safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); }
+
+        /* Task input */
+        .task-input {
+            width: 100%;
+            background: #f7f5f3;
+            border: none;
+            border-radius: 14px;
+            padding: 15px 18px;
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            color: #111;
+            outline: none;
+            transition: box-shadow 0.2s ease;
+        }
+        .task-input::placeholder { color: #bbb; }
+        .task-input:focus { box-shadow: 0 0 0 2px #c0405e40; }
+
+        /* Add button */
+        .add-btn {
+            background: #111111;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            border-radius: 14px;
+            padding: 15px 22px;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.15s ease, transform 0.1s ease;
+        }
+        .add-btn:hover { background: #333; }
+        .add-btn:active { transform: scale(0.97); }
+
+        /* Task card */
+        .task-card {
+            background: #ffffff;
+            border: 1.5px solid #f0eeec;
+            border-radius: 18px;
+            transition: border-color 0.2s ease, opacity 0.3s ease;
+        }
+        .task-card:active { border-color: #e0ddd9; }
+        .task-card-outstanding { border-left: 3px solid #c0405e; }
+
+        /* Checkbox */
+        .check-ring {
+            width: 22px; height: 22px;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+        .check-ring:hover { border-color: #c0405e; }
+        .check-ring.checked {
+            background: #c0405e;
+            border-color: #c0405e;
+        }
+        .check-ring svg { opacity: 0; transition: opacity 0.15s ease; }
+        .check-ring.checked svg { opacity: 1; }
+
+        /* Completed */
+        .task-done { opacity: 0.45; }
+        .task-done .task-text { text-decoration: line-through; }
+
+        /* Delete */
+        .delete-btn {
+            padding: 6px;
+            border-radius: 8px;
+            color: #ccc;
+            transition: all 0.15s ease;
+        }
+        .delete-btn:hover { color: #c0405e; background: #fdf0f2; }
+
+        /* Mission button — gold/yellow from the inspo */
+        .mission-btn {
+            width: 100%;
+            background: #c0405e;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            font-weight: 800;
+            font-size: 13px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border-radius: 100px;
+            padding: 18px 24px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: background 0.15s ease, transform 0.1s ease;
+        }
+        .mission-btn:hover { background: #a8344f; }
+        .mission-btn:active { transform: scale(0.98); }
+        .mission-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+        .mission-btn .bullet {
+            width: 8px; height: 8px;
+            background: #ffffff;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* Bottom bar */
+        .bottom-bar {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid #f0eeec;
+        }
+
+        /* Sticky section header */
+        .sticky-label {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(255,255,255,0.94);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        /* Pulse */
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+        /* Slide up */
+        .slide-up { animation: slideUp 0.3s ease both; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Toast */
+        .toast {
+            animation: toastIn 0.25s cubic-bezier(0.34,1.56,0.64,1), toastOut 0.25s ease-in 2.75s forwards;
+        }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(6px) scale(0.96); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes toastOut {
+            from { opacity: 1; }
+            to   { opacity: 0; }
+        }
+
+        .amazon-link { color: #e07020; font-weight: 600; text-decoration: underline; }
+
+        /* Mini Calendar */
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+        .cal-header { font-size: 9px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 0; }
+        .cal-day {
+            font-size: 13px; font-weight: 500; color: #555; padding: 6px 0;
+            border-radius: 10px; position: relative; cursor: default;
+        }
+        .cal-day.today { background: #c0405e; color: #fff; font-weight: 700; border-radius: 10px; }
+        .cal-day.other-month { color: #ddd; }
+        .cal-day .dot {
+            width: 4px; height: 4px; background: #c0405e; border-radius: 50%;
+            position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+        }
+        .cal-day.today .dot { background: #fff; }
+        .cal-nav { font-size: 13px; font-weight: 700; color: #111; user-select: none; }
+        .cal-nav button { background: none; border: none; font-size: 18px; cursor: pointer; color: #999; padding: 4px 10px; }
+        .cal-nav button:hover { color: #111; }
+
+        /* Recurring tasks */
+        .recurring-card {
+            background: #f7f5f3; border-radius: 12px; padding: 10px 14px;
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 13px; color: #555;
+        }
+        .recurring-card .day-badge {
+            font-size: 10px; font-weight: 700; background: #c0405e20; color: #c0405e;
+            padding: 2px 8px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.06em;
+        }
+        .recurring-delete { background: none; border: none; color: #ccc; cursor: pointer; padding: 4px; }
+        .recurring-delete:hover { color: #c0405e; }
+        .recurring-add-row { display: flex; gap: 6px; align-items: center; }
+        .recurring-add-row input {
+            flex: 1; background: #f7f5f3; border: none; border-radius: 10px;
+            padding: 10px 12px; font-size: 13px; font-family: 'Inter', sans-serif;
+            color: #111; outline: none;
+        }
+        .recurring-add-row input:focus { box-shadow: 0 0 0 2px #c0405e40; }
+        .recurring-add-row select {
+            background: #f7f5f3; border: none; border-radius: 10px;
+            padding: 10px 8px; font-size: 12px; font-family: 'Inter', sans-serif;
+            color: #555; outline: none; cursor: pointer;
+        }
+        .recurring-add-btn {
+            background: #111; color: #fff; border: none; border-radius: 10px;
+            padding: 10px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.06em; cursor: pointer; white-space: nowrap;
+        }
+        .recurring-add-btn:hover { background: #333; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="safe-top"></div>
+    <header class="px-5 pt-5 pb-4">
+        <div class="max-w-lg mx-auto flex items-center justify-between">
+            <!-- Hamburger (decorative) -->
+            <button class="flex flex-col gap-1.5 p-1" aria-label="Menu">
+                <span class="block w-6 h-0.5 bg-gray-800 rounded"></span>
+                <span class="block w-6 h-0.5 bg-gray-800 rounded"></span>
+                <span class="block w-6 h-0.5 bg-gray-800 rounded"></span>
+            </button>
+            <!-- Logo -->
+            <div class="logo">Coupilot</div>
+            <!-- Spacer -->
+            <div class="w-8"></div>
+        </div>
+    </header>
+
+    <!-- Board Tabs -->
+    <div class="max-w-lg mx-auto px-5 pt-3">
+        <div class="flex rounded-xl overflow-hidden" style="background:#f7f5f3; border:1.5px solid #f0eeec;">
+            {% for bid, binfo in boards.items() %}
+            <a href="/?board={{ bid }}"
+               class="flex-1 text-center py-3 text-xs font-bold uppercase tracking-wider transition-all"
+               style="{% if bid == board_id %}background:#111; color:#fff;{% else %}color:#999;{% endif %}
+                      letter-spacing:0.08em; text-decoration:none;">
+                {{ binfo.name }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="max-w-lg mx-auto px-5 pt-4">
+        <div class="h-px bg-gray-100"></div>
+    </div>
+
+    <!-- Mini Calendar -->
+    <div class="max-w-lg mx-auto px-5 pt-5">
+        <div style="background:#f7f5f3; border-radius:18px; padding:16px 14px;">
+            <div class="cal-nav flex items-center justify-between mb-3">
+                <button onclick="calNav(-1)">&lsaquo;</button>
+                <span id="cal-title"></span>
+                <button onclick="calNav(1)">&rsaquo;</button>
+            </div>
+            <div class="cal-grid" id="cal-grid"></div>
+        </div>
+    </div>
+
+    <!-- Recurring Tasks -->
+    <div class="max-w-lg mx-auto px-5 pt-4 pb-1">
+        <div class="flex items-center justify-between mb-3">
+            <p class="section-label">Weekly Recurring</p>
+            <button onclick="document.getElementById('recurring-form').classList.toggle('hidden')"
+                    style="font-size:18px; background:none; border:none; cursor:pointer; color:#999; line-height:1;">+</button>
+        </div>
+
+        <!-- Add recurring form -->
+        <div id="recurring-form" class="hidden mb-3">
+            <div class="recurring-add-row">
+                <input type="text" id="recurring-desc" placeholder="e.g. Take out trash" maxlength="100">
+                <select id="recurring-day">
+                    <option value="0">Mon</option>
+                    <option value="1">Tue</option>
+                    <option value="2">Wed</option>
+                    <option value="3">Thu</option>
+                    <option value="4">Fri</option>
+                    <option value="5">Sat</option>
+                    <option value="6">Sun</option>
+                </select>
+                <button class="recurring-add-btn" onclick="addRecurring()">Add</button>
+            </div>
+        </div>
+
+        <!-- Recurring list -->
+        <div id="recurring-list" class="space-y-2">
+            {% for rt in recurring_tasks %}
+            <div class="recurring-card" id="recurring-{{ rt.id }}">
+                <div class="flex items-center gap-2">
+                    <span class="day-badge">{{ ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][rt.day_of_week] }}</span>
+                    <span>{{ rt.description }}</span>
+                </div>
+                <button class="recurring-delete" onclick="deleteRecurring({{ rt.id }})">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Page title -->
+    <div class="max-w-lg mx-auto px-5 pt-6 pb-2">
+        <p class="section-label mb-3">{{ boards[board_id].name|upper }}'S LIST</p>
+        <h1 style="font-family:'Fraunces',serif; font-weight:800; font-size:32px; line-height:1.1; letter-spacing:-0.02em;">
+            {{ boards[board_id].name }}'s Tasks
+        </h1>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-lg mx-auto px-5 pt-5 safe-bottom">
+
+        <!-- Add Task -->
+        <form method="POST" action="/?board={{ board_id }}" class="mb-8 slide-up">
+            <div class="flex gap-2.5">
+                <input
+                    type="text"
+                    name="task"
+                    placeholder="Add a task..."
+                    required
+                    maxlength="200"
+                    autocomplete="off"
+                    class="task-input flex-1"
+                >
+                <button type="submit" class="add-btn">Add</button>
+            </div>
+        </form>
+
+        <!-- Task Groups -->
+        {% for date_label, tasks in tasks_by_date.items() %}
+        <section class="mb-7 slide-up">
+
+            <!-- Section Header -->
+            <div class="sticky-label -mx-5 px-5 py-2 mb-3">
+                <div class="flex items-center gap-2">
+                    {% if date_label == 'Outstanding' %}
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500 pulse-dot"></span>
+                    <span class="section-label" style="color:#c0405e;">{{ date_label }}</span>
+                    <span style="font-size:10px; font-weight:700; background:#fdf0f2; color:#c0405e; padding:2px 8px; border-radius:100px; margin-left:auto;">
+                        {{ tasks|length }} overdue
+                    </span>
+                    {% else %}
+                    <span class="section-label">{{ date_label }}</span>
+                    <div class="flex-1 h-px bg-gray-100 ml-1"></div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Tasks -->
+            <div class="space-y-2.5">
+                {% for task in tasks %}
+                <div
+                    id="task-{{ task.id }}"
+                    class="task-card {{ 'task-card-outstanding' if date_label == 'Outstanding' else '' }} {{ 'task-done' if task.completed else '' }} flex items-center gap-3 px-4 py-3.5"
+                >
+                    <!-- Check -->
+                    <button
+                        onclick="toggleTask({{ task.id }})"
+                        class="task-check check-ring {{ 'checked' if task.completed else '' }}"
+                        aria-label="Complete"
+                    >
+                        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                            <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+
+                    <!-- Text -->
+                    <span
+                        onclick="sendTask({{ task.id }})"
+                        title="Tap to send via WhatsApp"
+                        class="task-text flex-1 text-sm font-medium cursor-pointer select-none leading-snug"
+                        style="color: {{ '#aaa' if task.completed else '#111' }};"
+                    >{{ task.description }}</span>
+
+                    <!-- Delete -->
+                    <button onclick="deleteTask({{ task.id }})" class="delete-btn" aria-label="Delete">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% else %}
+
+        <!-- Empty State -->
+        <div class="flex flex-col items-center justify-center py-20 slide-up text-center">
+            <div class="logo mb-3" style="font-size:28px; opacity:0.18;">Coupilot</div>
+            <p style="font-family:'Fraunces',serif; font-weight:700; font-size:20px; color:#111; margin-bottom:6px;">All clear</p>
+            <p style="font-size:14px; color:#bbb;">Add your first task above</p>
+        </div>
+
+        {% endfor %}
+    </main>
+
+    <!-- Bottom Bar -->
+    <div class="bottom-bar fixed bottom-0 left-0 right-0 px-5 pt-3"
+         style="padding-bottom: calc(max(env(safe-area-inset-bottom,0px),12px) + 12px);">
+        <div class="max-w-lg mx-auto">
+            <button id="send-btn" onclick="sendMission()" class="mission-btn">
+                <span class="bullet"></span>
+                Send Nudge to {{ nudge_target_name }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast-container" class="fixed bottom-28 left-0 right-0 flex justify-center px-5 z-50 pointer-events-none"></div>
+
+    <script>
+        const BOARD_ID = {{ board_id }};
+        const RECURRING_DAYS = {{ recurring_tasks | tojson }};
+
+        /* --- Mini Calendar --- */
+        let calYear, calMonth;
+        (function initCal() {
+            const now = new Date();
+            calYear = now.getFullYear();
+            calMonth = now.getMonth();
+            renderCal();
+        })();
+
+        function calNav(dir) {
+            calMonth += dir;
+            if (calMonth < 0) { calMonth = 11; calYear--; }
+            if (calMonth > 11) { calMonth = 0; calYear++; }
+            renderCal();
+        }
+
+        function renderCal() {
+            const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+            document.getElementById('cal-title').textContent = months[calMonth] + ' ' + calYear;
+
+            const grid = document.getElementById('cal-grid');
+            grid.innerHTML = '';
+
+            // Day headers
+            ['M','T','W','T','F','S','S'].forEach(d => {
+                const h = document.createElement('div');
+                h.className = 'cal-header';
+                h.textContent = d;
+                grid.appendChild(h);
+            });
+
+            const first = new Date(calYear, calMonth, 1);
+            const lastDay = new Date(calYear, calMonth + 1, 0).getDate();
+            let startDow = first.getDay() - 1;
+            if (startDow < 0) startDow = 6; // Sunday → 6
+
+            const today = new Date();
+            const recurringDows = new Set(RECURRING_DAYS.map(r => r.day_of_week));
+
+            // Previous month padding
+            const prevLast = new Date(calYear, calMonth, 0).getDate();
+            for (let i = startDow - 1; i >= 0; i--) {
+                const el = document.createElement('div');
+                el.className = 'cal-day other-month';
+                el.textContent = prevLast - i;
+                grid.appendChild(el);
+            }
+
+            // Current month days
+            for (let d = 1; d <= lastDay; d++) {
+                const el = document.createElement('div');
+                const date = new Date(calYear, calMonth, d);
+                const dow = date.getDay() === 0 ? 6 : date.getDay() - 1; // convert to Mon=0
+                const isToday = d === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
+                el.className = 'cal-day' + (isToday ? ' today' : '');
+                el.textContent = d;
+                if (recurringDows.has(dow)) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    el.appendChild(dot);
+                }
+                grid.appendChild(el);
+            }
+
+            // Next month padding
+            const totalCells = startDow + lastDay;
+            const remaining = (7 - (totalCells % 7)) % 7;
+            for (let i = 1; i <= remaining; i++) {
+                const el = document.createElement('div');
+                el.className = 'cal-day other-month';
+                el.textContent = i;
+                grid.appendChild(el);
+            }
+        }
+
+        /* --- Recurring Tasks --- */
+        async function addRecurring() {
+            const desc = document.getElementById('recurring-desc').value.trim();
+            const day = document.getElementById('recurring-day').value;
+            if (!desc) return;
+            try {
+                const res = await fetch('/recurring', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({description: desc, day_of_week: parseInt(day), board_id: BOARD_ID})
+                });
+                if (res.ok) location.reload();
+                else showToast('Failed to add', 'error');
+            } catch(e) { showToast('Something went wrong', 'error'); }
+        }
+
+        async function deleteRecurring(id) {
+            const card = document.getElementById('recurring-' + id);
+            card.style.transition = 'all 0.2s ease';
+            card.style.opacity = '0';
+            try { await fetch('/recurring/' + id, {method: 'DELETE'}); } catch(e) {}
+            setTimeout(() => card.remove(), 200);
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bg = type === 'success' ? 'rgba(17,17,17,0.88)' : 'rgba(192,64,94,0.92)';
+            toast.className = 'toast px-5 py-3 rounded-2xl shadow-xl text-xs font-bold uppercase tracking-widest';
+            toast.style.cssText = `background:${bg}; color:#fff; letter-spacing:0.08em;`;
+            toast.textContent = message;
+            container.innerHTML = '';
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        async function toggleTask(id) {
+            const card = document.getElementById(`task-${id}`);
+            const check = card.querySelector('.task-check');
+            const text = card.querySelector('.task-text');
+            try {
+                const res = await fetch(`/toggle/${id}`, { method: 'POST' });
+                const data = await res.json();
+                if (data.completed) {
+                    card.classList.add('task-done');
+                    check.classList.add('checked');
+                    text.style.color = '#aaa';
+                } else {
+                    card.classList.remove('task-done');
+                    check.classList.remove('checked');
+                    text.style.color = '#111';
+                }
+            } catch (e) {
+                showToast('Could not update', 'error');
+            }
+        }
+
+        async function deleteTask(id) {
+            const card = document.getElementById(`task-${id}`);
+            card.style.transition = 'all 0.22s ease';
+            card.style.opacity = '0';
+            card.style.transform = 'translateX(32px)';
+            try { await fetch(`/delete/${id}`, { method: 'POST' }); } catch(e) {}
+            setTimeout(() => {
+                card.remove();
+                document.querySelectorAll('section').forEach(s => {
+                    if (!s.querySelector('[id^="task-"]')) s.remove();
+                });
+            }, 220);
+        }
+
+        async function sendTask(id) {
+            showToast('Sending…');
+            try {
+                const res = await fetch(`/send_task/${id}?board=${BOARD_ID}`, { method: 'POST' });
+                const data = await res.json();
+                showToast(data.success ? 'Sent!' : (data.error || 'Failed'), data.success ? 'success' : 'error');
+            } catch (e) {
+                showToast('Something went wrong', 'error');
+            }
+        }
+
+        async function sendMission() {
+            const btn = document.getElementById('send-btn');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="bullet"></span> Sending…`;
+            try {
+                const res = await fetch(`/send?board=${BOARD_ID}`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Mission sent!');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(data.error || 'Failed', 'error');
+                }
+            } catch (e) {
+                showToast('Something went wrong', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span class="bullet"></span> Send Nudge to {{ nudge_target_name }}`;
+            }
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.env
+.env.backup
+.venv/
+*.db
+.DS_Store
+.claude/

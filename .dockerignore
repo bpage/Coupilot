@@ -1,0 +1,5 @@
+tasks.db
+.env.backup
+__pycache__
+*.pyc
+.env
