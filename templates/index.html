@@ -11,13 +11,50 @@
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,800;0,900;1,700;1,800;1,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        :root {
+            --bg: #ffffff;
+            --bg-card: #ffffff;
+            --bg-input: #f7f5f3;
+            --bg-cal: #f7f5f3;
+            --border: #f0eeec;
+            --text: #111111;
+            --text-muted: #555;
+            --text-faint: #aaaaaa;
+            --text-placeholder: #bbb;
+            --sticky-bg: rgba(255,255,255,0.94);
+            --bottom-bg: rgba(255,255,255,0.92);
+            --btn-bg: #111111;
+            --btn-hover: #333;
+            --delete-hover-bg: #fdf0f2;
+            --hamburger: #1f2937;
+        }
+
+        [data-theme="dark"] {
+            --bg: #121212;
+            --bg-card: #1e1e1e;
+            --bg-input: #2a2a2a;
+            --bg-cal: #1e1e1e;
+            --border: #2a2a2a;
+            --text: #e8e8e8;
+            --text-muted: #aaa;
+            --text-faint: #666;
+            --text-placeholder: #555;
+            --sticky-bg: rgba(18,18,18,0.94);
+            --bottom-bg: rgba(18,18,18,0.92);
+            --btn-bg: #e8e8e8;
+            --btn-hover: #ccc;
+            --delete-hover-bg: #2a1a1e;
+            --hamburger: #e8e8e8;
+        }
+
         * { -webkit-tap-highlight-color: transparent; }
 
         body {
             font-family: 'Inter', sans-serif;
-            background: #ffffff;
+            background: var(--bg);
             min-height: 100vh;
-            color: #111111;
+            color: var(--text);
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         /* Logo */
@@ -47,23 +84,23 @@
         /* Task input */
         .task-input {
             width: 100%;
-            background: #f7f5f3;
+            background: var(--bg-input);
             border: none;
             border-radius: 14px;
             padding: 15px 18px;
             font-size: 16px;
             font-family: 'Inter', sans-serif;
-            color: #111;
+            color: var(--text);
             outline: none;
-            transition: box-shadow 0.2s ease;
+            transition: box-shadow 0.2s ease, background 0.3s ease;
         }
-        .task-input::placeholder { color: #bbb; }
+        .task-input::placeholder { color: var(--text-placeholder); }
         .task-input:focus { box-shadow: 0 0 0 2px #c0405e40; }
 
         /* Add button */
         .add-btn {
-            background: #111111;
-            color: #fff;
+            background: var(--btn-bg);
+            color: var(--bg);
             font-family: 'Inter', sans-serif;
             font-weight: 700;
             font-size: 13px;
@@ -76,17 +113,17 @@
             white-space: nowrap;
             transition: background 0.15s ease, transform 0.1s ease;
         }
-        .add-btn:hover { background: #333; }
+        .add-btn:hover { background: var(--btn-hover); }
         .add-btn:active { transform: scale(0.97); }
 
         /* Task card */
         .task-card {
-            background: #ffffff;
-            border: 1.5px solid #f0eeec;
+            background: var(--bg-card);
+            border: 1.5px solid var(--border);
             border-radius: 18px;
-            transition: border-color 0.2s ease, opacity 0.3s ease;
+            transition: border-color 0.2s ease, opacity 0.3s ease, background 0.3s ease;
         }
-        .task-card:active { border-color: #e0ddd9; }
+        .task-card:active { border-color: var(--border); }
         .task-card-outstanding { border-left: 3px solid #c0405e; }
 
         /* Checkbox */
@@ -114,10 +151,10 @@
         .delete-btn {
             padding: 6px;
             border-radius: 8px;
-            color: #ccc;
+            color: var(--text-faint);
             transition: all 0.15s ease;
         }
-        .delete-btn:hover { color: #c0405e; background: #fdf0f2; }
+        .delete-btn:hover { color: #c0405e; background: var(--delete-hover-bg); }
 
         /* Mission button — gold/yellow from the inspo */
         .mission-btn {
@@ -152,10 +189,10 @@
 
         /* Bottom bar */
         .bottom-bar {
-            background: rgba(255,255,255,0.92);
+            background: var(--bottom-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid #f0eeec;
+            border-top: 1px solid var(--border);
         }
 
         /* Sticky section header */
@@ -163,7 +200,7 @@
             position: sticky;
             top: 0;
             z-index: 10;
-            background: rgba(255,255,255,0.94);
+            background: var(--sticky-bg);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
         }
@@ -201,50 +238,58 @@
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
         .cal-header { font-size: 9px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 0; }
         .cal-day {
-            font-size: 13px; font-weight: 500; color: #555; padding: 6px 0;
+            font-size: 13px; font-weight: 500; color: var(--text-muted); padding: 6px 0;
             border-radius: 10px; position: relative; cursor: default;
         }
         .cal-day.today { background: #c0405e; color: #fff; font-weight: 700; border-radius: 10px; }
-        .cal-day.other-month { color: #ddd; }
+        .cal-day.other-month { color: var(--text-faint); }
         .cal-day .dot {
             width: 4px; height: 4px; background: #c0405e; border-radius: 50%;
             position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
         }
         .cal-day.today .dot { background: #fff; }
-        .cal-nav { font-size: 13px; font-weight: 700; color: #111; user-select: none; }
-        .cal-nav button { background: none; border: none; font-size: 18px; cursor: pointer; color: #999; padding: 4px 10px; }
-        .cal-nav button:hover { color: #111; }
+        .cal-nav { font-size: 13px; font-weight: 700; color: var(--text); user-select: none; }
+        .cal-nav button { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-faint); padding: 4px 10px; }
+        .cal-nav button:hover { color: var(--text); }
 
         /* Recurring tasks */
         .recurring-card {
-            background: #f7f5f3; border-radius: 12px; padding: 10px 14px;
+            background: var(--bg-input); border-radius: 12px; padding: 10px 14px;
             display: flex; align-items: center; justify-content: space-between;
-            font-size: 13px; color: #555;
+            font-size: 13px; color: var(--text-muted);
         }
         .recurring-card .day-badge {
             font-size: 10px; font-weight: 700; background: #c0405e20; color: #c0405e;
             padding: 2px 8px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.06em;
         }
-        .recurring-delete { background: none; border: none; color: #ccc; cursor: pointer; padding: 4px; }
+        .recurring-delete { background: none; border: none; color: var(--text-faint); cursor: pointer; padding: 4px; }
         .recurring-delete:hover { color: #c0405e; }
         .recurring-add-row { display: flex; gap: 6px; align-items: center; }
         .recurring-add-row input {
-            flex: 1; background: #f7f5f3; border: none; border-radius: 10px;
+            flex: 1; background: var(--bg-input); border: none; border-radius: 10px;
             padding: 10px 12px; font-size: 13px; font-family: 'Inter', sans-serif;
-            color: #111; outline: none;
+            color: var(--text); outline: none;
         }
         .recurring-add-row input:focus { box-shadow: 0 0 0 2px #c0405e40; }
         .recurring-add-row select {
-            background: #f7f5f3; border: none; border-radius: 10px;
+            background: var(--bg-input); border: none; border-radius: 10px;
             padding: 10px 8px; font-size: 12px; font-family: 'Inter', sans-serif;
-            color: #555; outline: none; cursor: pointer;
+            color: var(--text-muted); outline: none; cursor: pointer;
         }
         .recurring-add-btn {
-            background: #111; color: #fff; border: none; border-radius: 10px;
+            background: var(--btn-bg); color: var(--bg); border: none; border-radius: 10px;
             padding: 10px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase;
             letter-spacing: 0.06em; cursor: pointer; white-space: nowrap;
         }
-        .recurring-add-btn:hover { background: #333; }
+        .recurring-add-btn:hover { background: var(--btn-hover); }
+
+        /* Dark mode toggle */
+        .theme-toggle {
+            background: none; border: none; cursor: pointer; padding: 4px;
+            color: var(--text-faint); font-size: 20px; line-height: 1;
+            transition: color 0.2s ease;
+        }
+        .theme-toggle:hover { color: var(--text); }
     </style>
 </head>
 <body>
@@ -253,11 +298,9 @@
     <div class="safe-top"></div>
     <header class="px-5 pt-5 pb-4">
         <div class="max-w-lg mx-auto flex items-center justify-between">
-            <!-- Hamburger (decorative) -->
-            <button class="flex flex-col gap-1.5 p-1" aria-label="Menu">
-                <span class="block w-6 h-0.5 bg-gray-800 rounded"></span>
-                <span class="block w-6 h-0.5 bg-gray-800 rounded"></span>
-                <span class="block w-6 h-0.5 bg-gray-800 rounded"></span>
+            <!-- Dark mode toggle -->
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" id="theme-btn">
+                🌙
             </button>
             <!-- Logo -->
             <div class="logo">Coupilot</div>
@@ -268,11 +311,11 @@
 
     <!-- Board Tabs -->
     <div class="max-w-lg mx-auto px-5 pt-3">
-        <div class="flex rounded-xl overflow-hidden" style="background:#f7f5f3; border:1.5px solid #f0eeec;">
+        <div class="flex rounded-xl overflow-hidden" style="background:var(--bg-input); border:1.5px solid var(--border);">
             {% for bid, binfo in boards.items() %}
             <a href="/?board={{ bid }}"
                class="flex-1 text-center py-3 text-xs font-bold uppercase tracking-wider transition-all"
-               style="{% if bid == board_id %}background:#111; color:#fff;{% else %}color:#999;{% endif %}
+               style="{% if bid == board_id %}background:var(--btn-bg); color:var(--bg);{% else %}color:var(--text-faint);{% endif %}
                       letter-spacing:0.08em; text-decoration:none;">
                 {{ binfo.name }}
             </a>
@@ -287,7 +330,7 @@
 
     <!-- Mini Calendar -->
     <div class="max-w-lg mx-auto px-5 pt-5">
-        <div style="background:#f7f5f3; border-radius:18px; padding:16px 14px;">
+        <div style="background:var(--bg-cal); border-radius:18px; padding:16px 14px;">
             <div class="cal-nav flex items-center justify-between mb-3">
                 <button onclick="calNav(-1)">&lsaquo;</button>
                 <span id="cal-title"></span>
@@ -343,7 +386,7 @@
     <!-- Page title -->
     <div class="max-w-lg mx-auto px-5 pt-6 pb-2">
         <p class="section-label mb-3">{{ boards[board_id].name|upper }}'S LIST</p>
-        <h1 style="font-family:'Fraunces',serif; font-weight:800; font-size:32px; line-height:1.1; letter-spacing:-0.02em;">
+        <h1 style="font-family:'Fraunces',serif; font-weight:800; font-size:32px; line-height:1.1; letter-spacing:-0.02em; color:var(--text);">
             {{ boards[board_id].name }}'s Tasks
         </h1>
     </div>
@@ -410,7 +453,7 @@
                         onclick="sendTask({{ task.id }})"
                         title="Tap to send via WhatsApp"
                         class="task-text flex-1 text-sm font-medium cursor-pointer select-none leading-snug"
-                        style="color: {{ '#aaa' if task.completed else '#111' }};"
+                        style="color: {{ 'var(--text-faint)' if task.completed else 'var(--text)' }};"
                     >{{ task.description }}</span>
 
                     <!-- Delete -->
@@ -450,6 +493,20 @@
     <div id="toast-container" class="fixed bottom-28 left-0 right-0 flex justify-center px-5 z-50 pointer-events-none"></div>
 
     <script>
+        /* --- Dark Mode --- */
+        function toggleTheme() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const theme = isDark ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            document.getElementById('theme-btn').textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+        (function initTheme() {
+            const saved = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', saved);
+            document.getElementById('theme-btn').textContent = saved === 'dark' ? '☀️' : '🌙';
+        })();
+
         const BOARD_ID = {{ board_id }};
         const RECURRING_DAYS = {{ recurring_tasks | tojson }};
 
@@ -574,11 +631,11 @@
                 if (data.completed) {
                     card.classList.add('task-done');
                     check.classList.add('checked');
-                    text.style.color = '#aaa';
+                    text.style.color = 'var(--text-faint)';
                 } else {
                     card.classList.remove('task-done');
                     check.classList.remove('checked');
-                    text.style.color = '#111';
+                    text.style.color = 'var(--text)';
                 }
             } catch (e) {
                 showToast('Could not update', 'error');
